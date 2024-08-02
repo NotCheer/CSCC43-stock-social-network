@@ -7,7 +7,7 @@
 
 
 #include <pqxx/pqxx>
-#include "Portfolio.h"
+#include "../obj/Portfolio.h"
 #include <vector>
 
 class PortfolioDao {

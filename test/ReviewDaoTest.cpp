@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../src/ReviewDao.h"
+#include "../src/dao/ReviewDao.h"
 
 int main() {
     std::string dbname = "mydb";

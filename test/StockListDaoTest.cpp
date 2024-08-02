@@ -3,7 +3,7 @@
 //
 
 #include <iostream>
-#include "../src/StockListDao.h"
+#include "../src/dao/StockListDao.h"
 
 int main() {
     std::string dbname = "mydb";

@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include <pqxx/pqxx>
-#include "Review.h"
+#include "../obj/Review.h"
 
 class ReviewDao {
 private:

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../src/FriendshipDao.h"
+#include "../src/dao/FriendshipDao.h"
 
 int main() {
     std::string dbname = "mydb";

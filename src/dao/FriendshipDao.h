@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include <pqxx/pqxx>
-#include "Friendship.h"
+#include "../obj/Friendship.h"
 
 class FriendshipDao {
 private:

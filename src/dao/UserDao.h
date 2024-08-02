@@ -7,7 +7,7 @@
 
 
 #include <pqxx/pqxx>
-#include "User.h"
+#include "../obj/User.h"
 
 class UserDao {
 public:

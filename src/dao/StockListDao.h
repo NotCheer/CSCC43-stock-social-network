@@ -8,7 +8,7 @@
 
 #include <string>
 #include <vector>
-#include "StockList.h"
+#include "../obj/StockList.h"
 #include <pqxx/pqxx>
 
 class StockListDao {

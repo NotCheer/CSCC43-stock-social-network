@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include <pqxx/pqxx>
-#include "StockListHolding.h"
+#include "../obj/StockListHolding.h"
 
 class StockListHoldingDao {
 private:

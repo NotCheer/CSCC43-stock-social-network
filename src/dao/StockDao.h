@@ -7,7 +7,7 @@
 
 
 #include <pqxx/pqxx>
-#include "Stock.h"
+#include "../obj/Stock.h"
 
 class StockDao {
 private:

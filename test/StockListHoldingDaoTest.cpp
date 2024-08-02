@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../src/StockListHoldingDao.h"
+#include "../src/dao/StockListHoldingDao.h"
 
 int main() {
     std::string dbname = "mydb";
