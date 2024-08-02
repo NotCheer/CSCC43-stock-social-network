@@ -16,10 +16,10 @@ bool StockDao::createStock(const Stock& stock) {
     }
 }
 
-Stock StockDao::getStockById(int id) {
+Stock StockDao::getStockById(int stock_id) {
     try {
         pqxx::work W(conn);
-        pqxx::result R = W.exec_params("SELECT id, symbol, company_name, current_price FROM stocks WHERE id = \$1", id);
+        pqxx::result R = W.exec_params("SELECT stock_id, symbol, company_name, current_price FROM stocks WHERE stock_id = \$1", stock_id);
         W.commit();
 
         if (R.size() != 1) {
@@ -27,7 +27,7 @@ Stock StockDao::getStockById(int id) {
         }
 
         pqxx::row row = R[0];
-        return Stock(row["id"].as<int>(), row["symbol"].as<std::string>(), row["company_name"].as<std::string>(), row["current_price"].as<double>());
+        return Stock(row["stock_id"].as<int>(), row["symbol"].as<std::string>(), row["company_name"].as<std::string>(), row["current_price"].as<double>());
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         throw;
@@ -37,7 +37,7 @@ Stock StockDao::getStockById(int id) {
 bool StockDao::updateStock(const Stock& stock) {
     try {
         pqxx::work W(conn);
-        W.exec_params("UPDATE stocks SET symbol = \$1, company_name = \$2, current_price = \$3 WHERE id = \$4",
+        W.exec_params("UPDATE stocks SET symbol = \$1, company_name = \$2, current_price = \$3 WHERE stock_id = \$4",
                       stock.getSymbol(), stock.getCompanyName(), stock.getCurrentPrice(), stock.getId());
         W.commit();
         return true;
@@ -47,10 +47,10 @@ bool StockDao::updateStock(const Stock& stock) {
     }
 }
 
-bool StockDao::deleteStock(int id) {
+bool StockDao::deleteStock(int stock_id) {
     try {
         pqxx::work W(conn);
-        W.exec_params("DELETE FROM stocks WHERE id = \$1", id);
+        W.exec_params("DELETE FROM stocks WHERE stock_id = \$1", stock_id);
         W.commit();
         return true;
     } catch (const std::exception& e) {
