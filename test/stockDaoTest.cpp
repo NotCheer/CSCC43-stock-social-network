@@ -1,7 +1,7 @@
 #include <iostream>
 #include <pqxx/pqxx>
-#include "PortfolioDao.h"
-#include "PortfolioHoldingDao.h"
+#include "../src/PortfolioDao.h"
+#include "../src/PortfolioHoldingDao.h"
 
 void initializeDatabase(pqxx::connection& conn);
 
