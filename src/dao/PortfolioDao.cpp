@@ -54,3 +54,5 @@ void PortfolioDao::deletePortfolio(int id) {
     txn.exec_params("DELETE FROM portfolios WHERE portfolio_id = \$1", id);
     txn.commit();
 }
+
+

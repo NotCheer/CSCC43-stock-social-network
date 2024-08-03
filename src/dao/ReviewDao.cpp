@@ -5,11 +5,13 @@
 
 ReviewDao::ReviewDao(const std::string& conn_str) : connection_string(conn_str) {}
 
-std::string formatTime(std::time_t time) {
-    std::tm *tm = std::gmtime(&time);
-    std::stringstream ss;
-    ss << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
-    return ss.str();
+namespace {
+    std::string formatTime(std::time_t time) {
+        std::tm *tm = std::gmtime(&time);
+        std::stringstream ss;
+        ss << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
+        return ss.str();
+    }
 }
 
 int ReviewDao::addReview(const Review& review) {

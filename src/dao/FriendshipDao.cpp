@@ -5,11 +5,13 @@
 
 FriendshipDao::FriendshipDao(const std::string& conn_str) : connection_string(conn_str) {}
 
-std::string formatTime(std::time_t time) {
-    std::tm *tm = std::gmtime(&time);
-    std::stringstream ss;
-    ss << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
-    return ss.str();
+namespace {
+    std::string formatTime(std::time_t time) {
+        std::tm *tm = std::gmtime(&time);
+        std::stringstream ss;
+        ss << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
+        return ss.str();
+    }
 }
 
 int FriendshipDao::addFriendship(const Friendship& friendship) {
@@ -48,10 +50,15 @@ Friendship FriendshipDao::getFriendshipById(int friendship_id) {
         ss_request >> std::get_time(&tm_request, "%Y-%m-%d %H:%M:%S");
         std::time_t request_date = std::mktime(&tm_request);
 
-        std::tm tm_response = {};
-        std::istringstream ss_response(row["response_date"].as<std::string>());
-        ss_response >> std::get_time(&tm_response, "%Y-%m-%d %H:%M:%S");
-        std::time_t response_date = std::mktime(&tm_response);
+        std::time_t response_date;
+        if (row["response_date"].is_null()) {
+            response_date = 0;  // or any default value you want
+        } else {
+            std::tm tm_response = {};
+            std::istringstream ss_response(row["response_date"].as<std::string>());
+            ss_response >> std::get_time(&tm_response, "%Y-%m-%d %H:%M:%S");
+            response_date = std::mktime(&tm_response);
+        }
 
         return Friendship(row["friendship_id"].as<int>(), row["user_id"].as<int>(), row["friend_id"].as<int>(), row["status"].as<std::string>(), request_date, response_date);
     } catch (const std::exception &e) {
@@ -75,11 +82,15 @@ std::vector<Friendship> FriendshipDao::getFriendshipsByUserId(int user_id) {
             ss_request >> std::get_time(&tm_request, "%Y-%m-%d %H:%M:%S");
             std::time_t request_date = std::mktime(&tm_request);
 
-            std::tm tm_response = {};
-            std::istringstream ss_response(row["response_date"].as<std::string>());
-            ss_response >> std::get_time(&tm_response, "%Y-%m-%d %H:%M:%S");
-            std::time_t response_date = std::mktime(&tm_response);
-
+            std::time_t response_date;
+            if (row["response_date"].is_null()) {
+                response_date = 0;  // or any default value you want
+            } else {
+                std::tm tm_response = {};
+                std::istringstream ss_response(row["response_date"].as<std::string>());
+                ss_response >> std::get_time(&tm_response, "%Y-%m-%d %H:%M:%S");
+                response_date = std::mktime(&tm_response);
+            }
             friendships.emplace_back(row["friendship_id"].as<int>(), row["user_id"].as<int>(), row["friend_id"].as<int>(), row["status"].as<std::string>(), request_date, response_date);
         }
     } catch (const std::exception &e) {

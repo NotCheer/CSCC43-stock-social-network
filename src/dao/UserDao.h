@@ -15,6 +15,7 @@ public:
 
     bool createUser(const User& user);
     User getUserById(int id);
+    User getUserByUsername(const std::string& username);
     bool updateUser(const User& user);
     bool deleteUser(int id);
 
