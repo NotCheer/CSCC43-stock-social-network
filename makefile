@@ -9,6 +9,7 @@ SRC=src/main.cpp \
     src/dao/PortfolioDao.cpp \
     src/dao/PortfolioHoldingDao.cpp \
     src/dao/PortfolioStatDao.cpp \
+    src/dao/StockHistoryDao.cpp \
     src/dao/ReviewDao.cpp \
     src/dao/StockDao.cpp \
     src/dao/StockListDao.cpp \
@@ -22,7 +23,8 @@ SRC=src/main.cpp \
     src/obj/Stock.cpp \
     src/obj/StockList.cpp \
     src/obj/StockListHolding.cpp \
-    src/obj/User.cpp
+    src/obj/User.cpp\
+    src/obj/StockHistory.cpp
 
 OBJ=$(addprefix build/, $(notdir $(SRC:.cpp=.o)))
 

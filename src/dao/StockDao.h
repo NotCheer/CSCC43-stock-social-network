@@ -20,6 +20,8 @@ public:
     Stock getStockById(int id);
     bool updateStock(const Stock& stock);
     bool deleteStock(int id);
+
+    std::vector<Stock> getAllStocks();
 };
 
 

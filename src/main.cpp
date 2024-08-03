@@ -5,7 +5,26 @@
 
 using json = nlohmann::json;
 
+class CORS {
+public:
+    struct context {};
+
+    void before_handle(crow::request& req, crow::response& res, context& ctx) {
+        res.add_header("Access-Control-Allow-Origin", "*");
+        res.add_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        res.add_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    }
+
+    void after_handle(crow::request& req, crow::response& res, context& ctx) {
+        res.add_header("Access-Control-Allow-Origin", "*");
+        res.add_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        res.add_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    }
+};
+
 int main() {
+    crow::App<CORS> app;
+
     // Database connection parameters
     std::string dbname = "mydb";
     std::string dbuser = "postgres";
@@ -24,12 +43,11 @@ int main() {
     PortfolioDao portfolioDao(conn);
     PortfolioHoldingDao portfolioHoldingDao(conn);
     StockDao stockDao(conn);
+    StockHistoryDao stockHistoryDao(conn);
     FriendshipDao friendshipDao(conn_str);
     StockListDao stockListDao(conn_str);
     StockListHoldingDao stockListHoldingDao(conn_str);
     ReviewDao reviewDao(conn_str);
-
-    crow::SimpleApp app;
 
     // Variable to store the current logged-in user ID
     int current_logged_in_user_id = -1;
@@ -230,25 +248,42 @@ int main() {
                                 return crow::response(403, "Forbidden: You can only access your own portfolios");
                             }
 
+                            // Retrieve portfolio name and cash account
+                            std::string portfolioName = portfolio.getName();
+                            double cashAccount = portfolio.getCashAccount();
+
                             std::vector<PortfolioHolding> holdings = portfolioHoldingDao.getPortfolioHoldingsByPortfolioId(portfolio_id);
                             nlohmann::json response;
+
+                            // Add portfolio details to the response
+                            response["portfolio"] = {
+                                    {"id", portfolio.getId()},
+                                    {"name", portfolioName},
+                                    {"cashAccount", cashAccount}
+                            };
+
+                            // Add holdings to the response
+                            nlohmann::json holdingsJson = nlohmann::json::array();
                             for (const auto& holding : holdings) {
                                 Stock stock = stockDao.getStockById(holding.getStockId());
-                                response.push_back({
-                                                           {"id", holding.getId()},
-                                                           {"portfolioId", holding.getPortfolioId()},
-                                                           {"stockId", holding.getStockId()},
-                                                           {"quantity", holding.getQuantity()},
-                                                           {"symbol", stock.getSymbol()},
-                                                           {"currentPrice", stock.getCurrentPrice()}
-                                                   });
+                                holdingsJson.push_back({
+                                                               {"id", holding.getId()},
+                                                               {"portfolioId", holding.getPortfolioId()},
+                                                               {"stockId", holding.getStockId()},
+                                                               {"quantity", holding.getQuantity()},
+                                                               {"symbol", stock.getSymbol()},
+                                                               {"currentPrice", stock.getCurrentPrice()}
+                                                       });
                             }
+                            response["holdings"] = holdingsJson;
+
                             return crow::response(response.dump());
                         } catch (const std::exception& e) {
                             std::cerr << e.what() << std::endl;
                             return crow::response(500, "Failed to retrieve portfolio holdings");
                         }
                     });
+
 
     // Add stock to portfolio (POST)
     CROW_ROUTE(app, "/portfolios/<int>/holding")
@@ -265,9 +300,12 @@ int main() {
                                 return crow::response(403, "Forbidden: You can only access your own portfolios");
                             }
 
+                            // Parse the request body
                             auto body = nlohmann::json::parse(req.body);
-                            int stockId = body["stockId"];
-                            double quantity = body["quantity"];
+
+                            // Convert stockId and quantity to appropriate types
+                            int stockId = std::stoi(body["stockId"].get<std::string>());
+                            double quantity = std::stod(body["quantity"].get<std::string>());
 
                             Stock stock = stockDao.getStockById(stockId);
                             double cost = stock.getCurrentPrice() * quantity;
@@ -291,6 +329,7 @@ int main() {
                         }
                     });
 
+
     // Update portfolio holding (PUT)
     CROW_ROUTE(app, "/portfolios/<int>/holding/<int>")
             .methods(crow::HTTPMethod::PUT)
@@ -312,8 +351,11 @@ int main() {
                                 return crow::response(400, "Bad Request: Holding does not belong to the specified portfolio");
                             }
 
+                            // Parse the request body
                             auto body = nlohmann::json::parse(req.body);
-                            double newQuantity = body["quantity"];
+
+                            // Convert quantity to appropriate type
+                            double newQuantity = std::stod(body["quantity"].get<std::string>());
                             double oldQuantity = holding.getQuantity();
                             Stock stock = stockDao.getStockById(holding.getStockId());
                             double priceDifference = stock.getCurrentPrice() * (newQuantity - oldQuantity);
@@ -851,6 +893,57 @@ int main() {
                         } catch (const std::exception& e) {
                             std::cerr << e.what() << std::endl;
                             return crow::response(500, "Failed to delete review");
+                        }
+                    });
+
+
+    CROW_ROUTE(app, "/stocks")
+            .methods(crow::HTTPMethod::GET)
+                    ([&stockDao]() {
+                        try {
+                            std::vector<Stock> stocks = stockDao.getAllStocks();
+                            nlohmann::json response = nlohmann::json::array();
+
+                            for (const auto& stock : stocks) {
+                                nlohmann::json stockJson;
+                                stockJson["id"] = stock.getId();
+                                stockJson["symbol"] = stock.getSymbol();
+                                stockJson["companyName"] = stock.getCompanyName();
+                                stockJson["currentPrice"] = stock.getCurrentPrice();
+                                response.push_back(stockJson);
+                            }
+
+                            return crow::response(200, response.dump());
+                        } catch (const std::exception& e) {
+                            std::cerr << e.what() << std::endl;
+                            return crow::response(500, "Failed to retrieve stocks");
+                        }
+                    });
+
+    CROW_ROUTE(app, "/stocks/<int>")
+            .methods(crow::HTTPMethod::GET)
+                    ([&stockHistoryDao](int stockId) {
+                        try {
+                            std::vector<StockHistory> stockHistories = stockHistoryDao.getStockHistoriesByStockId(stockId);
+                            nlohmann::json response = nlohmann::json::array();
+
+                            for (const auto& stockHistory : stockHistories) {
+                                nlohmann::json historyJson;
+                                historyJson["stockHistoryId"] = stockHistory.getStockHistoryId();
+                                historyJson["timestamp"] = stockHistory.getTimestamp();
+                                historyJson["open"] = stockHistory.getOpen();
+                                historyJson["high"] = stockHistory.getHigh();
+                                historyJson["low"] = stockHistory.getLow();
+                                historyJson["close"] = stockHistory.getClose();
+                                historyJson["volume"] = stockHistory.getVolume();
+                                historyJson["symbol"] = stockHistory.getSymbol();
+                                response.push_back(historyJson);
+                            }
+
+                            return crow::response(200, response.dump());
+                        } catch (const std::exception& e) {
+                            std::cerr << e.what() << std::endl;
+                            return crow::response(500, "Failed to retrieve stock history");
                         }
                     });
 

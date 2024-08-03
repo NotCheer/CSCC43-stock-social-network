@@ -39,7 +39,7 @@ public:
     std::string getSymbol() const;
     void setSymbol(const std::string& symbol);
 
-private:
+public:
     int stockHistoryId;
     std::string timestamp;
     double open;

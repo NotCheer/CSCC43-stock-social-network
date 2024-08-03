@@ -14,6 +14,7 @@
 #include "StockDao.h"
 #include "StockListDao.h"
 #include "StockListHoldingDao.h"
+#include "StockHistoryDao.h"
 #include "UserDao.h"
 
 #endif //CSCC43_STOCK_SOCIAL_NETWORK_DAO_ALL_H

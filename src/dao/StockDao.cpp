@@ -58,3 +58,21 @@ bool StockDao::deleteStock(int stock_id) {
         return false;
     }
 }
+
+std::vector<Stock> StockDao::getAllStocks() {
+    pqxx::work txn(conn);
+    pqxx::result result = txn.exec("SELECT stock_id, symbol, company_name, current_price FROM stocks");
+
+    std::vector<Stock> stocks;
+    for (const auto& row : result) {
+        Stock stock(
+                row["stock_id"].as<int>(),
+                row["symbol"].as<std::string>(),
+                row["company_name"].as<std::string>(),
+                row["current_price"].as<double>()
+        );
+        stocks.push_back(stock);
+    }
+
+    return stocks;
+}

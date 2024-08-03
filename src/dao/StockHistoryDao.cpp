@@ -1,4 +1,5 @@
 #include "StockHistoryDao.h"
+#include "../dao/StockDao.h"
 #include <ctime>
 #include <iomanip>
 #include <sstream>
@@ -113,6 +114,32 @@ std::vector<StockHistory> StockHistoryDao::getStockHistoriesBySymbol(const std::
                                     row["close"].as<double>(),
                                     row["volume"].as<long>(),
                                     row["symbol"].as<std::string>());
+    }
+
+    return stockHistories;
+}
+
+std::vector<StockHistory> StockHistoryDao::getStockHistoriesByStockId(int stockId) {
+    pqxx::work txn(conn);
+    StockDao stockDao(conn);
+    Stock stock = stockDao.getStockById(stockId);
+    std::string symbol = stock.getSymbol();
+
+    pqxx::result result = txn.exec("SELECT * FROM stock_histories WHERE symbol = " + txn.quote(symbol) + " ORDER BY timestamp DESC");
+
+    std::vector<StockHistory> stockHistories;
+    for (const auto& row : result) {
+        StockHistory stockHistory(
+                row["stock_history_id"].as<int>(),
+                row["timestamp"].as<std::string>(),
+                row["open"].as<double>(),
+                row["high"].as<double>(),
+                row["low"].as<double>(),
+                row["close"].as<double>(),
+                row["volume"].as<long>(),
+                row["symbol"].as<std::string>()
+        );
+        stockHistories.push_back(stockHistory);
     }
 
     return stockHistories;

@@ -20,6 +20,7 @@ public:
     StockHistory getStockHistoryById(int stockHistoryId);
     std::vector<StockHistory> getStockHistoriesBySymbolAndDuration(const std::string& symbol, const std::string& startTime, int duration);
     std::vector<StockHistory> getStockHistoriesBySymbol(const std::string& symbol);
+    std::vector<StockHistory> getStockHistoriesByStockId(int stockId);
 
 private:
     pqxx::connection& conn;
