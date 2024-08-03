@@ -21,14 +21,31 @@ bool UserDao::createUser(const User& user) {
 User UserDao::getUserById(int id) {
     try {
         pqxx::nontransaction N(conn);
-        pqxx::result R = N.exec("SELECT id, username, password FROM users WHERE id = " + N.quote(id));
+        pqxx::result R = N.exec("SELECT user_id, username, password FROM users WHERE user_id = " + N.quote(id));
 
         if (R.size() != 1) {
             throw std::runtime_error("User not found");
         }
 
         const auto& row = R[0];
-        return User(row["id"].as<int>(), row["username"].as<std::string>(), row["password"].as<std::string>());
+        return User(row["user_id"].as<int>(), row["username"].as<std::string>(), row["password"].as<std::string>());
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        throw;
+    }
+}
+
+User UserDao::getUserByUsername(const std::string& username) {
+    try {
+        pqxx::nontransaction N(conn);
+        pqxx::result R = N.exec("SELECT user_id, username, password FROM users WHERE username = " + N.quote(username));
+
+        if (R.size() != 1) {
+            throw std::runtime_error("User not found");
+        }
+
+        const auto& row = R[0];
+        return User(row["user_id"].as<int>(), row["username"].as<std::string>(), row["password"].as<std::string>());
     } catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;
         throw;
@@ -40,7 +57,7 @@ bool UserDao::updateUser(const User& user) {
         pqxx::work W(conn);
         W.exec0("UPDATE users SET username = " + W.quote(user.getUsername()) +
                 ", password = " + W.quote(user.getPassword()) +
-                " WHERE id = " + W.quote(user.getId()));
+                " WHERE user_id = " + W.quote(user.getId()));
         W.commit();
         return true;
     } catch (const std::exception &e) {
@@ -52,7 +69,7 @@ bool UserDao::updateUser(const User& user) {
 bool UserDao::deleteUser(int id) {
     try {
         pqxx::work W(conn);
-        W.exec0("DELETE FROM users WHERE id = " + W.quote(id));
+        W.exec0("DELETE FROM users WHERE user_id = " + W.quote(id));
         W.commit();
         return true;
     } catch (const std::exception &e) {

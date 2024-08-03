@@ -1,7 +1,7 @@
 #include <iostream>
 #include <pqxx/pqxx>
-#include "Stock.h"
-#include "StockDao.h"
+#include "../src/obj/Stock.h"
+#include "../src/dao/StockDao.h"
 
 void testStockDao() {
     // Database connection parameters

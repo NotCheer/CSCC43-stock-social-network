@@ -7,7 +7,7 @@
 
 
 #include <pqxx/pqxx>
-#include "Stock.h"
+#include "../obj/Stock.h"
 
 class StockDao {
 private:
@@ -20,6 +20,8 @@ public:
     Stock getStockById(int id);
     bool updateStock(const Stock& stock);
     bool deleteStock(int id);
+
+    std::vector<Stock> getAllStocks();
 };
 
 

@@ -7,7 +7,7 @@
 
 
 #include <pqxx/pqxx>
-#include "User.h"
+#include "../obj/User.h"
 
 class UserDao {
 public:
@@ -15,6 +15,7 @@ public:
 
     bool createUser(const User& user);
     User getUserById(int id);
+    User getUserByUsername(const std::string& username);
     bool updateUser(const User& user);
     bool deleteUser(int id);
 
